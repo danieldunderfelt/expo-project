@@ -1,0 +1,48 @@
+.DS_Store
+.eslintcache
+.expo/
+.metro-health-check*
+*.jks
+*.key
+*.mobileprovision
+*.orig.*
+*.p12
+*.p8
+*.swp
+android
+credentials.json
+dist/
+expo-env.d.ts
+ios
+node_modules/
+npm-debug.*
+tsconfig.tsbuildinfo
+web-build/
+
+.env*
+.env_local
+
+# Added by Task Master AI
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+dev-debug.log
+# Dependency directories
+# Environment variables
+.env
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+# OS specific
+# Task files
+tasks.json
+tasks/
+/tmp

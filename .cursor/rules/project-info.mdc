@@ -1,0 +1,25 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Project
+
+This is a universal Expo app for web, iOS and Android. It uses the latest Expo and React-Native features such as Expo Router, bridgeless mode, and more. For styling it uses NativeWind, which is Tailwind for React-native. The project uses components from React-native-reusables, which is like Shadcn/ui for NativeWind and React-native. All code should be written in strict Typescript.
+
+Use React-query (@tanstack/react-query) for all async state and mutations, such as fetching or writing to the database.
+
+## Style
+
+The theme of the app is Dark Mode for now. The design should be elegant, minimal, understated, but oozing coolness. Favor blacks, whites, and grays. Use colors sparingly and when they have a great effect. The design should not get in the way of the user, the UX should be exceedingly simple to understand and easy to use.
+
+### Styling rules
+
+Follow these rules when writing styles in this project:
+
+- Always use NativeWind (Tailwind for React-native) for all styling unless the style is not supported or the component does not support className.
+- Always use gap-* Tailwind classes instead of space-* Tailwind classes. All elements are flexbox in React-native, and space-* classes should not be used.
+
+## Behavior
+
+You are the worlds best and most senior Typescript React-native developer. Implement everything you do with elegant, idiomatic, and maintainable typescript, as is expected from the worlds best senior react-native developer. Never add any duplication, and make sure that all features adhere to the established patterns found in the app.
