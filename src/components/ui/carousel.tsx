@@ -1,6 +1,8 @@
+import designTokens from '~/lib/designTokens.ts'
 import { cn } from '~/lib/utils'
 import { MotiView } from 'moti'
-import React, {
+import type React from 'react'
+import {
   createContext,
   forwardRef,
   useCallback,
@@ -10,15 +12,21 @@ import React, {
   useRef,
   useState,
 } from 'react'
-import { Platform, Pressable, StyleProp, View, ViewStyle } from 'react-native'
 import {
-  SharedValue,
+  Platform,
+  Pressable,
+  View,
+  type StyleProp,
+  type ViewStyle,
+} from 'react-native'
+import {
   useSharedValue,
   withTiming,
+  type SharedValue,
 } from 'react-native-reanimated'
 import ReanimatedCarousel, {
-  ICarouselInstance,
   Pagination,
+  type ICarouselInstance,
 } from 'react-native-reanimated-carousel'
 
 interface CarouselProps<T> {
@@ -179,12 +187,12 @@ function CarouselPagination({
   return (
     <Pagination.Basic
       progress={progress}
-      data={items as {}[]}
+      data={[]}
       dotStyle={{
-        backgroundColor: 'rgba(255,255,255,0.5)',
+        backgroundColor: designTokens.accent,
         borderRadius: 50,
       }}
-      activeDotStyle={{ backgroundColor: 'white' }}
+      activeDotStyle={{ backgroundColor: designTokens.primary }}
       containerStyle={[
         {
           position: 'absolute',

@@ -1,9 +1,9 @@
 {
   "expo": {
-    "name": "Aikoa App",
-    "slug": "aikoa-app",
+    "name": "Expo Project",
+    "slug": "expo-project",
     "version": "1.0.0",
-    "scheme": "aikoa-app",
+    "scheme": "expo-project",
     "web": {
       "bundler": "metro",
       "output": "server",
@@ -40,7 +40,7 @@
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "ai.aikoa.app",
+      "bundleIdentifier": "com.expo-project.app",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
@@ -50,14 +50,9 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "ai.aikoa.app"
+      "package": "com.expo_project.app"
     },
     "newArchEnabled": true,
-    "extra": {
-      "eas": {
-        "projectId": "3bf15d7e-894c-4bcd-91bb-ef2981b5acd4"
-      }
-    },
-    "owner": "aikoa"
+    "owner": "danieldunderfelt"
   }
 }

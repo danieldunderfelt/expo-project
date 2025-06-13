@@ -1,0 +1,4 @@
+appId: com.expo-project.app
+---
+- launchApp
+- assertVisible: 'Welcome to Expo'

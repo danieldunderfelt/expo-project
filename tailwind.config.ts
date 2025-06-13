@@ -3,6 +3,7 @@ import nativewindPreset from 'nativewind/preset'
 import { hairlineWidth } from 'nativewind/theme'
 import type { Config } from 'tailwindcss'
 import tailwindcssAnimate from 'tailwindcss-animate'
+import designTokens from './src/lib/designTokens'
 
 export default {
   darkMode: 'class',
@@ -11,38 +12,38 @@ export default {
   theme: {
     extend: {
       colors: {
-        border: 'hsl(var(--border))',
-        input: 'hsl(var(--input))',
-        ring: 'hsl(var(--ring))',
-        background: 'hsl(var(--background))',
-        foreground: 'hsl(var(--foreground))',
+        border: designTokens.border,
+        input: designTokens.input,
+        ring: designTokens.ring,
+        background: designTokens.background,
+        foreground: designTokens.foreground,
         primary: {
-          DEFAULT: 'hsl(var(--primary))',
-          foreground: 'hsl(var(--primary-foreground))',
+          DEFAULT: designTokens.primary,
+          foreground: designTokens.primaryForeground,
         },
         secondary: {
-          DEFAULT: 'hsl(var(--secondary))',
-          foreground: 'hsl(var(--secondary-foreground))',
+          DEFAULT: designTokens.secondary,
+          foreground: designTokens.secondaryForeground,
         },
         destructive: {
-          DEFAULT: 'hsl(var(--destructive))',
-          foreground: 'hsl(var(--destructive-foreground))',
+          DEFAULT: designTokens.destructive,
+          foreground: designTokens.destructiveForeground,
         },
         muted: {
-          DEFAULT: 'hsl(var(--muted))',
-          foreground: 'hsl(var(--muted-foreground))',
+          DEFAULT: designTokens.muted,
+          foreground: designTokens.mutedForeground,
         },
         accent: {
-          DEFAULT: 'hsl(var(--accent))',
-          foreground: 'hsl(var(--accent-foreground))',
+          DEFAULT: designTokens.accent,
+          foreground: designTokens.accentForeground,
         },
         popover: {
-          DEFAULT: 'hsl(var(--popover))',
-          foreground: 'hsl(var(--popover-foreground))',
+          DEFAULT: designTokens.popover,
+          foreground: designTokens.popoverForeground,
         },
         card: {
-          DEFAULT: 'hsl(var(--card))',
-          foreground: 'hsl(var(--card-foreground))',
+          DEFAULT: designTokens.card,
+          foreground: designTokens.cardForeground,
         },
       },
       borderWidth: {
