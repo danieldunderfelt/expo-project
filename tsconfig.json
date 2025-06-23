@@ -16,6 +16,7 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "noEmit": true,
+    "experimentalDecorators": true,
     "noImplicitOverride": true,
     "noUnusedLocals": true,
     "resolveJsonModule": true,
