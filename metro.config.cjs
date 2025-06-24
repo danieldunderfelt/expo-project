@@ -21,7 +21,7 @@ module.exports = withNativeWind(
     resolver: {
       ...config.resolver,
       assetExts: config.resolver.assetExts.filter((ext) => ext !== 'svg'),
-      sourceExts: [...config.resolver.sourceExts, 'svg', 'json', 'mjs'],
+      sourceExts: [...config.resolver.sourceExts, 'svg', 'json', 'mjs', 'sql'],
       unstable_enablePackageExports: true,
       unstable_conditionNames: ['require', 'react-native', 'default'],
       resolveRequest: (context, moduleName, platform) => {

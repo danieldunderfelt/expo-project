@@ -1,3 +1,5 @@
+import { observable } from '@legendapp/state'
+import type { ApiOrder, Product } from '~/data/types.ts'
 import Constants from 'expo-constants'
 import { Platform } from 'react-native'
 
@@ -28,28 +30,11 @@ const getApiUrl = (): string => {
 
 const API_URL = getApiUrl()
 
-// --- TYPE DEFINITIONS (from mock-server.ts) ---
-export type Product = {
-  id: string
-  name: string
-  price: number
-  created_at: number
-  updated_at: number
-}
-
-export type Order = {
-  id: string
-  name: string
-  product_id: string
-  quantity: number
-  unit: 'kg' | 'pcs' | 'liter'
-  department: string
-  created_at: number
-  updated_at: number
-  deleted_at: number | null
-}
-
 type Resource = 'products' | 'orders'
+
+export const apiState$ = observable({
+  offline: false,
+})
 
 /**
  * A generic API client to interact with the mock server.
@@ -60,8 +45,12 @@ type Resource = 'products' | 'orders'
 async function apiClient<T>(
   endpoint: string,
   options?: RequestInit,
-): Promise<T> {
+): Promise<T | null> {
   try {
+    if (apiState$.offline.get()) {
+      return null
+    }
+
     const response = await fetch(`${API_URL}/${endpoint}`, {
       ...options,
       headers: {
@@ -78,13 +67,12 @@ async function apiClient<T>(
     }
 
     if (response.status === 204) {
-      return null as T // For DELETE requests that might not return content
+      return null
     }
 
     return response.json()
   } catch (error) {
     console.error('API Client Error:', error)
-    // Re-throw the error so it can be caught by the caller (e.g., React Query)
     throw error
   }
 }
@@ -122,26 +110,15 @@ const updateItem =
     })
   }
 
-const deleteItem =
-  <T>(resource: Resource) =>
-  (id: string) => {
-    return apiClient<T>(`${resource}/${id}`, {
-      method: 'DELETE',
-    })
-  }
-
-// --- EXPORTED API CLIENT ---
 export const api = {
   products: {
     getAll: getItems<Product>('products'),
     getOne: getItem<Product>('products'),
     update: updateItem<Product>('products'),
-    delete: deleteItem<Product>('products'),
   },
   orders: {
-    getAll: getItems<Order>('orders'),
-    getOne: getItem<Order>('orders'),
-    update: updateItem<Order>('orders'),
-    delete: deleteItem<Order>('orders'),
+    getAll: getItems<ApiOrder>('orders'),
+    getOne: getItem<ApiOrder>('orders'),
+    update: updateItem<ApiOrder>('orders'),
   },
 }

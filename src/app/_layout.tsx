@@ -1,6 +1,7 @@
 import NetInfo from '@react-native-community/netinfo'
 import { DarkTheme, ThemeProvider, type Theme } from '@react-navigation/native'
 import { PortalHost } from '@rn-primitives/portal'
+import { useDrizzleStudio } from 'expo-drizzle-studio-plugin'
 import { Stack } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import { colorScheme } from 'nativewind'
@@ -15,10 +16,14 @@ import {
   QueryClientProvider,
 } from '@tanstack/react-query'
 import { AlertProvider } from '~/components/GlobalAlert.tsx'
+import { db, expoSqLite } from '~/data/db/setup.ts'
+import { SyncProvider } from '~/data/sync.tsx'
 import { NAV_THEME } from '~/lib/constants'
 import { getGlobalHeaderOptions } from '~/lib/headerConfig'
+import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
+import migrations from '../../drizzle/migrations'
 
 export const unstable_settings = {
   initialRouteName: 'index',
@@ -42,11 +47,11 @@ export {
 const queryClient = new QueryClient()
 
 if (Platform.OS !== 'web') {
-  onlineManager.setEventListener((setOnline) => {
-    return NetInfo.addEventListener((state) => {
+  onlineManager.setEventListener((setOnline) =>
+    NetInfo.addEventListener((state) => {
       setOnline(!!state.isConnected)
-    })
-  })
+    }),
+  )
 }
 
 function onAppStateChange(status: AppStateStatus) {
@@ -56,8 +61,23 @@ function onAppStateChange(status: AppStateStatus) {
 }
 
 export default function RootLayout() {
+  useDrizzleStudio(expoSqLite)
+  const { success: migrationsSuccess, error: migrationsError } = useMigrations(
+    db,
+    migrations,
+  )
+
+  if (migrationsError) {
+    console.error(migrationsError)
+  }
+
+  if (!migrationsSuccess) {
+    console.log('Migrations in progress')
+  } else {
+    console.log('Migrations successful')
+  }
+
   const hasMounted = useRef(false)
-  // const { isDarkColorScheme } = useColorScheme()
   const [isColorSchemeLoaded, setIsColorSchemeLoaded] = useState(false)
 
   useIsomorphicLayoutEffect(() => {
@@ -83,26 +103,28 @@ export default function RootLayout() {
     }
   }, [])
 
-  if (!isColorSchemeLoaded) {
+  if (!isColorSchemeLoaded || !migrationsSuccess) {
     return null
   }
 
   return (
     <GestureHandlerRootView className="w-full flex-1 flex-col bg-background">
       <QueryClientProvider client={queryClient}>
-        <ThemeProvider value={DARK_THEME}>
-          <SafeAreaProvider>
-            <AlertProvider>
-              <BottomSheetModalProvider>
-                <StatusBar style={'light'} />
-                <View className="w-full flex-1 web:mx-auto web:max-w-screen-md web:border-border web:md:border-x">
-                  <Stack screenOptions={getGlobalHeaderOptions()} />
-                </View>
-              </BottomSheetModalProvider>
-              <PortalHost />
-            </AlertProvider>
-          </SafeAreaProvider>
-        </ThemeProvider>
+        <SyncProvider>
+          <ThemeProvider value={DARK_THEME}>
+            <SafeAreaProvider>
+              <AlertProvider>
+                <BottomSheetModalProvider>
+                  <StatusBar style={'light'} />
+                  <View className="w-full flex-1 web:mx-auto web:max-w-screen-md web:border-border web:md:border-x">
+                    <Stack screenOptions={getGlobalHeaderOptions()} />
+                  </View>
+                </BottomSheetModalProvider>
+                <PortalHost />
+              </AlertProvider>
+            </SafeAreaProvider>
+          </ThemeProvider>
+        </SyncProvider>
       </QueryClientProvider>
     </GestureHandlerRootView>
   )

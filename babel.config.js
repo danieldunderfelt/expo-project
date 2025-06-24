@@ -6,6 +6,6 @@ export default function (api) {
       ['babel-preset-expo', { jsxImportSource: 'nativewind' }],
       'nativewind/babel',
     ],
-    plugins: [['@babel/plugin-proposal-decorators', { legacy: true }]],
+    plugins: [['inline-import', { extensions: ['.sql'] }]],
   }
 }

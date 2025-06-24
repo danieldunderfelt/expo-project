@@ -1,27 +1,8 @@
-// --- TYPE DEFINITIONS ---
-type Product = {
-  id: string
-  name: string
-  price: number
-  created_at: number
-  updated_at: number
-}
-
-type Order = {
-  id: string
-  name: string
-  product_id: string
-  quantity: number
-  unit: 'kg' | 'pcs' | 'liter'
-  department: string
-  created_at: number
-  updated_at: number
-  deleted_at: number | null
-}
+import type { ApiOrder, Product } from '~/data/types.ts'
 
 // --- IN-MEMORY DATABASE ---
 const products: Product[] = []
-let orders: Order[] = []
+const orders: ApiOrder[] = []
 
 // --- DATA GENERATION ---
 const productNames = [
@@ -36,7 +17,7 @@ const productNames = [
   'Avocado',
   'Dark Chocolate',
 ]
-const units: Order['unit'][] = ['kg', 'pcs', 'liter']
+const units: ApiOrder['unit'][] = ['kg', 'pcs', 'liter']
 const department = 'Groceries'
 
 const generateMockData = () => {
@@ -64,9 +45,7 @@ const generateMockData = () => {
       quantity: Math.floor(Math.random() * 10) + 1,
       unit: units[Math.floor(Math.random() * units.length)],
       department,
-      created_at: now,
       updated_at: now,
-      deleted_at: null,
     })
   }
 
@@ -167,13 +146,9 @@ const server = Bun.serve({
                   headers: { 'Content-Type': 'application/json' },
                 })
           }
-          let filteredData = applyFilters(orders, searchParams)
-          // If not syncing diffs, hide deleted items.
-          if (!searchParams.has('updated_at_since')) {
-            filteredData = filteredData.filter(
-              (order) => order.deleted_at === null,
-            )
-          }
+
+          const filteredData = applyFilters(orders, searchParams)
+
           return new Response(JSON.stringify(filteredData), {
             headers: { 'Content-Type': 'application/json' },
           })
@@ -208,35 +183,6 @@ const server = Bun.serve({
               id,
               updated_at: Date.now(),
             }
-            return new Response(JSON.stringify(orders[itemIndex]), {
-              headers: { 'Content-Type': 'application/json' },
-            })
-          }
-        }
-        return new Response(JSON.stringify({ error: 'Not Found' }), {
-          status: 404,
-          headers: { 'Content-Type': 'application/json' },
-        })
-      }
-
-      // DELETE /resource/:id
-      if (req.method === 'DELETE' && id) {
-        if (resource === 'products') {
-          const itemIndex = products.findIndex((item) => item.id === id)
-          if (itemIndex > -1) {
-            const [deletedItem] = products.splice(itemIndex, 1)
-            orders = orders.filter((order) => order.product_id !== id)
-            console.log(`Deleted product ${id} and associated orders.`)
-            return new Response(JSON.stringify(deletedItem), {
-              headers: { 'Content-Type': 'application/json' },
-            })
-          }
-        } else if (resource === 'orders') {
-          const itemIndex = orders.findIndex((item) => item.id === id)
-          if (itemIndex > -1) {
-            const now = Date.now()
-            orders[itemIndex].deleted_at = now
-            orders[itemIndex].updated_at = now
             return new Response(JSON.stringify(orders[itemIndex]), {
               headers: { 'Content-Type': 'application/json' },
             })

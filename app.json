@@ -4,11 +4,7 @@
     "slug": "expo-project",
     "version": "1.0.0",
     "scheme": "expo-project",
-    "web": {
-      "bundler": "metro",
-      "output": "server",
-      "favicon": "./assets/favicon.png"
-    },
+    "web": false,
     "plugins": [
       "expo-router",
       [
@@ -21,7 +17,8 @@
       "expo-font",
       "expo-web-browser",
       "react-native-edge-to-edge",
-      "expo-secure-store"
+      "expo-secure-store",
+      "expo-sqlite"
     ],
     "experiments": {
       "reactCompiler": true,
