@@ -16,6 +16,7 @@ type Order = {
   department: string
   created_at: number
   updated_at: number
+  deleted_at: number | null
 }
 
 // --- IN-MEMORY DATABASE ---
@@ -65,6 +66,7 @@ const generateMockData = () => {
       department,
       created_at: now,
       updated_at: now,
+      deleted_at: null,
     })
   }
 
@@ -80,6 +82,19 @@ const applyFilters = <T extends Record<string, unknown>>(
 ): T[] => {
   let filteredData = [...data]
   query.forEach((value, key) => {
+    // Handle 'greater than' filters, e.g., updated_at_since=...
+    if (key.endsWith('_since')) {
+      const field = key.replace('_since', '')
+      if (data.length > 0 && !(field in data[0])) {
+        return
+      }
+      filteredData = filteredData.filter((item) => {
+        const itemValue = item[field]
+        return typeof itemValue === 'number' && itemValue > Number(value)
+      })
+      return // Continue to next query param
+    }
+
     if (data.length === 0 || !(key in data[0])) {
       return
     }
@@ -152,7 +167,13 @@ const server = Bun.serve({
                   headers: { 'Content-Type': 'application/json' },
                 })
           }
-          const filteredData = applyFilters(orders, searchParams)
+          let filteredData = applyFilters(orders, searchParams)
+          // If not syncing diffs, hide deleted items.
+          if (!searchParams.has('updated_at_since')) {
+            filteredData = filteredData.filter(
+              (order) => order.deleted_at === null,
+            )
+          }
           return new Response(JSON.stringify(filteredData), {
             headers: { 'Content-Type': 'application/json' },
           })
@@ -213,8 +234,10 @@ const server = Bun.serve({
         } else if (resource === 'orders') {
           const itemIndex = orders.findIndex((item) => item.id === id)
           if (itemIndex > -1) {
-            const [deletedItem] = orders.splice(itemIndex, 1)
-            return new Response(JSON.stringify(deletedItem), {
+            const now = Date.now()
+            orders[itemIndex].deleted_at = now
+            orders[itemIndex].updated_at = now
+            return new Response(JSON.stringify(orders[itemIndex]), {
               headers: { 'Content-Type': 'application/json' },
             })
           }

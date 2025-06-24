@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons'
 import { NAV_THEME } from '~/lib/constants.ts'
 import { cn } from '~/lib/utils'
-import React from 'react'
+import type React from 'react'
 import { Pressable, TextInput, View, type TextInputProps } from 'react-native'
 import { NumericFormat } from 'react-number-format'
 
