@@ -3,8 +3,9 @@ import { api } from '~/data/api.ts'
 import { orderChanges, orders } from '~/data/db/schema.ts'
 import { db } from '~/data/db/setup.ts'
 import { applyOrderChanges } from '~/data/orders/applyOrderChanges.ts'
-import { apiOrderToOrder, type InsertOrderChange } from '~/data/types.ts'
-import { eq, inArray } from 'drizzle-orm'
+import { useSync } from '~/data/sync.tsx'
+import type { InsertOrderChange } from '~/data/types.ts'
+import { inArray } from 'drizzle-orm'
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
 import { useMemo } from 'react'
 
@@ -74,6 +75,8 @@ export function useAddChange() {
 }
 
 export function useSaveChanges() {
+  const { syncOrders } = useSync()
+
   const {
     mutate: saveChanges,
     isPending,
@@ -88,33 +91,8 @@ export function useSaveChanges() {
         orderId: change.orderId,
       }))
 
-      const uniqueOrdersCount = new Set(changes.map((change) => change.orderId))
-        .size
-
-      const updatedOrders = await api.orders.applyChanges(changes)
-
-      if (!updatedOrders || updatedOrders.length !== uniqueOrdersCount) {
-        throw new Error('Failed to apply changes')
-      }
-
-      for (const order of updatedOrders) {
-        const { changedFields } = applyOrderChanges(
-          apiOrderToOrder(order),
-          pendingChanges || [],
-        )
-
-        await db
-          .update(orders)
-          .set({
-            name: order.name,
-            productId: order.product_id,
-            quantity: order.quantity,
-            unit: order.unit,
-            department: order.department,
-            updatedAt: order.updated_at,
-          })
-          .where(eq(orders.id, order.id))
-      }
+      await api.orders.applyChanges(changes)
+      await syncOrders()
 
       await db.delete(orderChanges).where(
         inArray(
@@ -122,8 +100,12 @@ export function useSaveChanges() {
           pendingChanges.map((change) => change.id),
         ),
       )
-
-      return updatedOrders
+    },
+    onSuccess: async () => {
+      console.log('changes saved')
+    },
+    onError: (error) => {
+      console.error('error saving changes', error)
     },
   })
 

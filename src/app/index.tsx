@@ -4,7 +4,11 @@ import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
 import { Text } from '~/components/ui/text'
 import type { Order } from '~/data/db/schema'
-import { useAddChange, useOrders } from '~/data/orders/useOrders'
+import {
+  useAddChange,
+  useOrders,
+  useSaveChanges,
+} from '~/data/orders/useOrders'
 import { syncState$, useSync } from '~/data/sync.tsx'
 import { cn } from '~/lib/utils.ts'
 import { memo, startTransition, useCallback, useOptimistic } from 'react'
@@ -97,6 +101,7 @@ const OrderCard = memo(
 const Index = observer(function Index() {
   const { orders, error, changes } = useOrders()
   const { syncOrders } = useSync()
+  const { saveChanges } = useSaveChanges()
 
   const isReady = use$(() => syncState$.lastSyncAt.get() > 0)
   const isSyncing = use$(() => syncState$.syncStartedAt.get() > 0)
@@ -115,7 +120,7 @@ const Index = observer(function Index() {
               <Button
                 variant="secondary"
                 onPress={() => {
-                  // TODO: Sync changes
+                  saveChanges()
                 }}>
                 <Text>Save</Text>
               </Button>

@@ -10,7 +10,7 @@ import type { ApiOrder } from '~/data/types.ts'
 import { createContext, useCallback, useContext, useEffect } from 'react'
 
 export const SyncContext = createContext({
-  syncOrders: () => {},
+  syncOrders: async () => {},
   flushOrderChanges: () => {},
 })
 
@@ -33,7 +33,7 @@ export const SyncProvider = observer(function SyncProvider({
 }) {
   const queryClient = useQueryClient()
 
-  const { mutate: _syncOrders } = useMutation({
+  const { mutateAsync: _syncOrders } = useMutation({
     mutationFn: async () => {
       console.log('syncOrders start')
       syncState$.syncStartedAt.set(Date.now())
@@ -122,12 +122,12 @@ export const SyncProvider = observer(function SyncProvider({
 
   const syncState = use$(syncState$)
 
-  const syncOrders = useCallback(() => {
+  const syncOrders = useCallback(async () => {
     if (syncState.syncStartedAt > 0) {
       return
     }
 
-    _syncOrders()
+    await _syncOrders()
   }, [syncState.syncStartedAt, _syncOrders])
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: only run on mount
