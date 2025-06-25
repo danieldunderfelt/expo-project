@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "69528226-7f61-4711-a863-9abc3c29f101",
+  "id": "3771f5cb-fbc2-4769-9847-bd401585390f",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "order_changes": {
@@ -23,7 +23,7 @@
         },
         "change_value": {
           "name": "change_value",
-          "type": "text",
+          "type": "integer",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false

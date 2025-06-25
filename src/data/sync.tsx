@@ -2,7 +2,7 @@ import { observable } from '@legendapp/state'
 import { ObservablePersistMMKV } from '@legendapp/state/persist-plugins/mmkv'
 import { observer, use$ } from '@legendapp/state/react'
 import { syncObservable } from '@legendapp/state/sync'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '~/data/api.ts'
 import { orders } from '~/data/db/schema.ts'
 import { db } from '~/data/db/setup.ts'
@@ -31,11 +31,21 @@ export const SyncProvider = observer(function SyncProvider({
 }: {
   children: React.ReactNode
 }) {
+  const queryClient = useQueryClient()
+
   const { mutate: _syncOrders } = useMutation({
     mutationFn: async () => {
       console.log('syncOrders start')
       syncState$.syncStartedAt.set(Date.now())
+
+      const start = performance.now()
       const nextOrders = await api.orders.getAll()
+
+      const fetchTime = performance.now() - start
+
+      console.log(
+        `fetched ${nextOrders?.length || 0} orders in ${fetchTime.toFixed(2)}ms`,
+      )
 
       if (!nextOrders || nextOrders.length === 0) {
         console.log('syncOrders no orders')
@@ -43,12 +53,13 @@ export const SyncProvider = observer(function SyncProvider({
       }
 
       try {
-        return db.transaction(async (tx) => {
+        const insertStart = performance.now()
+        const result = await db.transaction(async (tx) => {
           const deleted = await tx.delete(orders)
           console.log('deleted old orders', deleted.changes)
 
           const batches = nextOrders.reduce((acc, order, index) => {
-            const batch = Math.floor(index / 100)
+            const batch = Math.floor(index / 1000)
             acc[batch] = acc[batch] || []
             acc[batch].push(order)
             return acc
@@ -74,8 +85,6 @@ export const SyncProvider = observer(function SyncProvider({
             insertedCount += inserted.changes
           }
 
-          console.log('inserted new orders', insertedCount)
-
           if (insertedCount !== nextOrders.length) {
             console.warn(
               'Inserted orders count mismatch. Inserted:',
@@ -87,6 +96,14 @@ export const SyncProvider = observer(function SyncProvider({
 
           return true
         })
+
+        const insertTime = performance.now() - insertStart
+        const totalTime = performance.now() - start
+        console.log(
+          `inserted ${nextOrders.length} orders in ${insertTime.toFixed(2)}ms (total: ${totalTime.toFixed(2)}ms)`,
+        )
+
+        return result
       } catch (error) {
         console.error('syncOrders error', error)
         return false
@@ -96,6 +113,7 @@ export const SyncProvider = observer(function SyncProvider({
       if (result) {
         syncState$.lastSyncAt.set(Date.now())
         console.log('syncOrders success')
+        queryClient.invalidateQueries({ queryKey: ['orders'] })
       }
     },
     onError: (error) => console.error('syncOrders error', error),
@@ -110,9 +128,9 @@ export const SyncProvider = observer(function SyncProvider({
     }
 
     _syncOrders()
-  }, [syncState, _syncOrders])
+  }, [syncState.syncStartedAt, _syncOrders])
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  // biome-ignore lint/correctness/useExhaustiveDependencies: only run on mount
   useEffect(() => {
     syncOrders()
   }, [])

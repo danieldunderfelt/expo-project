@@ -16,7 +16,6 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "noEmit": true,
-    "experimentalDecorators": true,
     "noImplicitOverride": true,
     "noUnusedLocals": true,
     "resolveJsonModule": true,
@@ -33,6 +32,7 @@
     "**/*.tsx",
     "expo-env.d.ts",
     "nativewind-env.d.ts",
-    ".expo/types/**/*.ts"
+    ".expo/types/**/*.ts",
+    "drizzle.config.cjs"
   ]
 }

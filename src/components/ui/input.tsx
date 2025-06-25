@@ -1,9 +1,9 @@
 import { Ionicons } from '@expo/vector-icons'
+import { Text } from '~/components/ui/text'
 import { NAV_THEME } from '~/lib/constants.ts'
 import { cn } from '~/lib/utils'
 import type React from 'react'
 import { Pressable, TextInput, View, type TextInputProps } from 'react-native'
-import { NumericFormat } from 'react-number-format'
 
 interface InputProps extends Omit<TextInputProps, 'value' | 'onChangeText'> {
   ref?: React.RefObject<TextInput>
@@ -76,30 +76,50 @@ function Input({
     )
   }
 
-  // If numeric type with formatting enabled, use NumericFormat
   if (type === 'numeric' && formatted) {
+    const formatNumber = (val: string | number | undefined): string => {
+      if (val === undefined || val === null || val === '') return ''
+      const numericValue =
+        typeof val === 'number'
+          ? val
+          : Number.parseFloat(String(val).replace(/,/g, '.'))
+      if (Number.isNaN(numericValue)) return String(val)
+
+      const options: Intl.NumberFormatOptions = {
+        useGrouping: !!thousandSeparator,
+        style: 'decimal',
+      }
+      if (decimalScale !== undefined) {
+        options.maximumFractionDigits = decimalScale
+        if (fixedDecimalScale) {
+          options.minimumFractionDigits = decimalScale
+        }
+      }
+      return new Intl.NumberFormat('fi-FI', options).format(numericValue)
+    }
+
+    const handleNumericChange = (text: string) => {
+      if (!onChangeText) return
+      const rawValue = text.replace(/[^0-9,.-]/g, '')
+      const normalized = rawValue.replace(/,/g, '.')
+      onChangeText(normalized)
+    }
+
+    const textStyle = 'py-2 text-foreground font-semibold text-lg'
+
     return (
       <View className="relative">
-        <NumericFormat
-          customInput={TextInput}
-          value={value}
-          onValueChange={(values) => {
-            onChangeText?.(values.value)
-          }}
-          thousandSeparator={thousandSeparator}
-          decimalSeparator={decimalSeparator}
-          decimalScale={decimalScale}
-          fixedDecimalScale={fixedDecimalScale}
-          allowNegative={allowNegative}
-          prefix={prefix}
-          suffix={suffix}
-          className={baseClassName}
+        {prefix ? <Text className={textStyle}>{prefix}</Text> : null}
+        <TextInput
+          className={cn(baseClassName)}
           placeholderClassName={placeholderClass}
-          placeholder={props.placeholder}
-          editable={props.editable}
-          autoFocus={props.autoFocus}
-          keyboardType={props.keyboardType}
+          value={formatNumber(value)}
+          onChangeText={handleNumericChange}
+          keyboardType="numeric"
+          selectTextOnFocus
+          {...props}
         />
+        {suffix ? <Text className={textStyle}>{suffix}</Text> : null}
         {renderClearButton()}
       </View>
     )

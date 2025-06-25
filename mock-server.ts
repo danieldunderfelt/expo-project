@@ -1,4 +1,4 @@
-import type { ApiOrder, Product } from '~/data/types.ts'
+import type { ApiOrder, InsertOrderChange, Product } from '~/data/types.ts'
 
 // --- IN-MEMORY DATABASE ---
 const products: Product[] = []
@@ -36,7 +36,7 @@ const generateMockData = () => {
   }
 
   // Generate orders
-  for (let i = 0; i < 10000; i++) {
+  for (let i = 0; i < 100; i++) {
     const product = products[Math.floor(Math.random() * products.length)]
     orders.push({
       id: crypto.randomUUID(),
@@ -190,6 +190,42 @@ const server = Bun.serve({
         }
         return new Response(JSON.stringify({ error: 'Not Found' }), {
           status: 404,
+          headers: { 'Content-Type': 'application/json' },
+        })
+      }
+
+      // APPLY ORDER CHANGES
+      if (req.method === 'POST' && pathname === '/orders/apply-changes') {
+        const changes = (await req.json()) as InsertOrderChange[]
+        const updatedOrders: ApiOrder[] = []
+
+        for (const change of changes) {
+          const itemIndex = orders.findIndex(
+            (item) => item.id === change.orderId,
+          )
+          if (itemIndex > -1) {
+            const currentItem = orders[itemIndex]
+            // Ensure the key exists on the order and the value is of a compatible type
+            if (
+              Object.prototype.hasOwnProperty.call(
+                currentItem,
+                change.changeKey,
+              )
+            ) {
+              const key = change.changeKey as keyof ApiOrder
+              if (typeof currentItem[key] === typeof change.changeValue) {
+                const updatedItem: ApiOrder = {
+                  ...currentItem,
+                  [key]: change.changeValue,
+                  updated_at: Date.now(),
+                }
+                orders[itemIndex] = updatedItem
+                updatedOrders.push(updatedItem)
+              }
+            }
+          }
+        }
+        return new Response(JSON.stringify(updatedOrders), {
           headers: { 'Content-Type': 'application/json' },
         })
       }

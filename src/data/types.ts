@@ -1,3 +1,5 @@
+import type { Order } from '~/data/db/schema.ts'
+
 export type Product = {
   id: string
   name: string
@@ -18,6 +20,18 @@ export type ApiOrder = {
 
 export type InsertOrderChange = {
   changeKey: string
-  changeValue: string
+  changeValue: number
   orderId: string
+}
+
+export function apiOrderToOrder(apiOrder: ApiOrder): Order {
+  return {
+    id: apiOrder.id,
+    name: apiOrder.name,
+    productId: apiOrder.product_id,
+    quantity: apiOrder.quantity,
+    unit: apiOrder.unit,
+    department: apiOrder.department,
+    updatedAt: apiOrder.updated_at,
+  } satisfies Order
 }

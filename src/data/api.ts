@@ -1,5 +1,5 @@
 import { observable } from '@legendapp/state'
-import type { ApiOrder, Product } from '~/data/types.ts'
+import type { ApiOrder, InsertOrderChange, Product } from '~/data/types.ts'
 import Constants from 'expo-constants'
 import { Platform } from 'react-native'
 
@@ -110,6 +110,13 @@ const updateItem =
     })
   }
 
+const applyOrderChanges = (changes: InsertOrderChange[]) => {
+  return apiClient<ApiOrder[]>('orders/apply-changes', {
+    method: 'POST',
+    body: JSON.stringify(changes),
+  })
+}
+
 export const api = {
   products: {
     getAll: getItems<Product>('products'),
@@ -120,5 +127,6 @@ export const api = {
     getAll: getItems<ApiOrder>('orders'),
     getOne: getItem<ApiOrder>('orders'),
     update: updateItem<ApiOrder>('orders'),
+    applyChanges: applyOrderChanges,
   },
 }

@@ -33,7 +33,7 @@ export const orderChanges = sqliteTable(
       .primaryKey()
       .$defaultFn(() => randomUUID()),
     changeKey: text('change_key').notNull(),
-    changeValue: text('change_value').notNull(),
+    changeValue: integer('change_value').notNull(),
     updatedAt: integer('updated_at').notNull(),
     orderId: text('order_id')
       .references(() => orders.id, {
