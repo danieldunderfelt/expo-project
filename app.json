@@ -49,6 +49,12 @@
       "package": "com.expo_project.app"
     },
     "newArchEnabled": true,
-    "owner": "danieldunderfelt"
+    "owner": "danieldunderfelt",
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "6164f30a-bfdb-457f-9f68-9d2b35dd18a7"
+      }
+    }
   }
 }
